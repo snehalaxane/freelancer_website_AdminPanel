@@ -75,7 +75,7 @@ import { Box, CircularProgress } from "@mui/material";
 import AdminLayout from "../layouts/AdminLayout";
 import AuthLayout from "../layouts/AuthLayout";
 
-const Login = lazy(() => import("../pages/auth/Login"));
+const Login = lazy(() => import("../pages/auth/Login/"));
 const ForgotPassword = lazy(() => import("../pages/auth/ForgotPassword"));
 const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 const FreelancerDetails = lazy(() =>
