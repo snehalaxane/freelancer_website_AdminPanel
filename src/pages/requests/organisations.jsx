@@ -102,7 +102,7 @@ const Organisations = () => {
   }
 
   return (
-    <Box p={4} sx={{ backgroundColor: "#f4f7fe", minHeight: "100vh" }}>
+    <Box p={4} sx={{ minHeight: "100vh" }}>
       <Box mb={3}>
         <Typography
           variant="h5"

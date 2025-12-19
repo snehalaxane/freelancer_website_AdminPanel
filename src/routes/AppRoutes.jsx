@@ -77,6 +77,7 @@ import AuthLayout from "../layouts/AuthLayout";
 
 const Login = lazy(() => import("../pages/auth/Login/"));
 const ForgotPassword = lazy(() => import("../pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("../pages/auth/ResetPassword"));
 const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 const FreelancerDetails = lazy(() =>
   import("../pages/requests/FreelancerDetails")
@@ -86,6 +87,14 @@ const Freelancers = lazy(() => import("../pages/requests/freelancers"));
 const Organisations = lazy(() => import("../pages/requests/organisations"));
 const OrganisationDetails = lazy(() =>
   import("../pages/requests/OrganisationDetails")
+);
+const RejectedFreelancers = lazy(() => import("../pages/rejected/freelancers"));
+const BlockedFreelancers = lazy(() => import("../pages/blocked/freelancers"));
+const RejectedOrganisations = lazy(() =>
+  import("../pages/rejected/organisations")
+);
+const BlockedOrganisations = lazy(() =>
+  import("../pages/blocked/organisations")
 );
 
 const AppRoutes = () => {
@@ -102,6 +111,7 @@ const AppRoutes = () => {
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
 
         {/* ADMIN */}
@@ -109,6 +119,11 @@ const AppRoutes = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users/clients" element={<Clients />} />
           <Route path="/requests/freelancers" element={<Freelancers />} />
+          <Route
+            path="/rejected/freelancers"
+            element={<RejectedFreelancers />}
+          />
+          <Route path="/blocked/freelancers" element={<BlockedFreelancers />} />
           <Route
             path="/requests/freelancers/:id"
             element={<FreelancerDetails />}
@@ -118,6 +133,17 @@ const AppRoutes = () => {
             path="/requests/organisations/:id"
             element={<OrganisationDetails />}
           />
+          <Route
+            path="/rejected/organisations"
+            element={<RejectedOrganisations />}
+          />
+          <Route
+            path="/blocked/organisations"
+            element={<BlockedOrganisations />}
+          />
+
+          {/* FALLBACK */}
+          {/* <Route path="*" element={<Navigate to="/login" replace />} /> */}
         </Route>
       </Routes>
     </Suspense>

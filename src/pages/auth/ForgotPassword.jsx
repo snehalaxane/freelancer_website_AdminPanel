@@ -1,152 +1,259 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
   TextField,
   Button,
-  Paper,
-  Stack,
-  IconButton,
   InputAdornment,
+  Link,
+  Paper,
+  Fade,
 } from "@mui/material";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import PageLoader from "../../components/common/PageLoader";
-import EmailIcon from "@mui/icons-material/Email";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
-  const navigate = useNavigate();
+  // --- STATE MANAGEMENT ---
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [timer, setTimer] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  // --- TIMER LOGIC ---
+  useEffect(() => {
+    let interval = null;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  // --- HANDLERS ---
+  const handleSubmit = (e) => {
     e.preventDefault();
+    if (!email) return;
+
     setLoading(true);
 
     // Simulate API Call
     setTimeout(() => {
       setLoading(false);
-      setSubmitted(true);
+      setIsSubmitted(true);
+      setTimer(60); // Start the 60s cooldown
     }, 1500);
+  };
+
+  const handleResend = () => {
+    setTimer(60);
+    // Add real API logic here
+    console.log("OTP Resent to:", email);
   };
 
   return (
     <Box
       sx={{
-        height: "95vh",
-        width: "265%",
+        height: "100vh",
+        width: "100vw",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#fff",
+        // backgroundColor: "#f4f7fe",
         p: 2,
+        overflow: "hidden",
       }}
     >
       <Paper
         elevation={0}
         sx={{
-          p: { xs: 3, md: 5 },
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" }, // Forced side-by-side on desktop
           width: "100%",
-          maxWidth: 550,
-          borderRadius: 4,
-          boxShadow: "0px 10px 30px rgba(27, 47, 116, 0.05)",
-          textAlign: "center",
+          maxWidth: "1050px",
+          minHeight: "600px",
+          borderRadius: "32px",
+          overflow: "hidden",
+          // boxShadow: "0px 30px 90px rgba(27, 47, 116, 0.1)",
         }}
       >
-        {!submitted ? (
-          <>
-            {/* Back Button */}
-            <Box textAlign="left" mb={2}>
-              <IconButton onClick={() => navigate("/login")} size="small">
-                <ArrowBackIcon fontSize="small" />
-              </IconButton>
-            </Box>
-
-            <Typography variant="h5" fontWeight={800} color="#1b2f74" mb={1}>
-              Forgot Password?
-            </Typography>
-            <Typography variant="body2" color="text.secondary" mb={4}>
-              Enter your email address and we'll send you a link to reset your
-              password.
-            </Typography>
-
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={3}>
-                <TextField
-                  fullWidth
-                  label="Email Address"
-                  placeholder="name@company.com"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailIcon
-                          sx={{ color: "action.active", fontSize: 20 }}
-                        />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-                />
-
-                <Button
-                  fullWidth
-                  size="large"
-                  type="submit"
-                  variant="contained"
-                  disabled={loading}
+        {/* LEFT SIDE: THE CONTENT AREA */}
+        <Box
+          sx={{
+            flex: 1,
+            p: { xs: 4, md: 8 },
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            // backgroundColor: "#fff",
+          }}
+        >
+          {!isSubmitted ? (
+            <Fade in={!isSubmitted} timeout={500}>
+              <Box>
+                <Typography
+                  variant="h3"
                   sx={{
-                    py: 1.5,
-                    borderRadius: 2,
-                    backgroundColor: "#1b2f74",
-                    fontWeight: 700,
-                    textTransform: "none",
-                    "&:hover": { backgroundColor: "#ff0000" },
+                    fontWeight: 800,
+                    color: "#1b2f74",
+                    mb: 1,
+                    fontSize: { xs: "2rem", md: "2.6rem" },
                   }}
                 >
-                  {loading ? "Sending Link..." : "Send Reset Link"}
-                </Button>
+                  Forgot Password?
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{ color: "#888", mb: 5, fontWeight: 500 }}
+                >
+                  NO WORRIES! Enter your email address below, and we'll send you
+                  an OTP to reset your password.
+                </Typography>
+
+                <Box component="form" onSubmit={handleSubmit}>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 600, mb: 1.5, color: "#444" }}
+                  >
+                    Email
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    required
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    variant="outlined"
+                    sx={{
+                      mb: 4,
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "14px",
+                        // backgroundColor: "#f8faff",
+                      },
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <MailOutlineIcon sx={{ color: "#1b2f74" }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    disabled={loading}
+                    sx={{
+                      py: 2,
+                      mb: 2.5,
+                      backgroundColor: "#1b2f74",
+                      borderRadius: "14px",
+                      textTransform: "none",
+                      fontSize: "1rem",
+                      fontWeight: 700,
+                      boxShadow: "0px 10px 25px rgba(27, 47, 116, 0.25)",
+                      "&:hover": { backgroundColor: "#14235a" },
+                    }}
+                  >
+                    {loading ? "Sending..." : "Submit"}
+                  </Button>
+                </Box>
+              </Box>
+            </Fade>
+          ) : (
+            <Fade in={isSubmitted} timeout={500}>
+              <Box sx={{ textAlign: "center" }}>
+                <CheckCircleOutlineIcon
+                  sx={{ fontSize: 90, color: "#ff0000", mb: 2 }}
+                />
+                <Typography
+                  variant="h4"
+                  sx={{ fontWeight: 800, color: "#1b2f74", mb: 2 }}
+                >
+                  Check Your Email
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{ color: "#666", mb: 5, lineHeight: 1.6 }}
+                >
+                  Verification email sent to: <br />
+                  <strong>{email}</strong>. Check your inbox and follow the
+                  steps.
+                </Typography>
+
+                <Box sx={{ mb: 4 }}>
+                  <Button
+                    disabled={timer > 0}
+                    onClick={handleResend}
+                    sx={{
+                      textTransform: "none",
+                      color: "#1b2f74",
+                      fontWeight: 800,
+                      fontSize: "1rem",
+                    }}
+                  >
+                    {timer > 0 ? `Resend email in ${timer}s` : "Resend Email"}
+                  </Button>
+                </Box>
 
                 <Button
                   variant="text"
-                  onClick={() => navigate("/login")}
-                  sx={{
-                    textTransform: "none",
-                    color: "text.secondary",
-                    fontWeight: 600,
-                  }}
+                  startIcon={<ArrowBackIcon />}
+                  onClick={() => setIsSubmitted(false)}
+                  sx={{ textTransform: "none", color: "#aaa" }}
                 >
-                  Back to Sign In
+                  Try another email
                 </Button>
-              </Stack>
-            </form>
-          </>
-        ) : (
-          <Box py={2}>
-            <CheckCircleOutlineIcon
-              sx={{ fontSize: 60, color: "#059669", mb: 2 }}
-            />
-            <Typography variant="h5" fontWeight={800} color="#1b2f74" mb={1}>
-              Check your email
-            </Typography>
-            <Typography variant="body2" color="text.secondary" mb={4}>
-              We have sent a password reset link to <br /> <b>{email}</b>
-            </Typography>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => setSubmitted(false)}
-              sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700 }}
-            >
-              Didn't receive the email? Try again
-            </Button>
-          </Box>
-        )}
+              </Box>
+            </Fade>
+          )}
+
+          <Link
+            href="/login"
+            sx={{
+              mt: 4,
+              textAlign: "center",
+              display: "block",
+              textDecoration: "none",
+              color: "#1b2f74",
+              fontWeight: 800,
+              fontSize: "0.9rem",
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            Back to Login
+          </Link>
+        </Box>
+
+        {/* RIGHT SIDE: THE ILLUSTRATION */}
+        <Box
+          sx={{
+            flex: 1.2,
+            // backgroundColor: "#fcfcff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 6,
+            // borderLeft: { md: "1px solid #f0f3f9" },
+          }}
+        >
+          <Box
+            component="img"
+            src="/forgot-password.gif" // Ensure this file is in your public folder
+            alt="Illustration"
+            sx={{
+              width: "100%",
+              height: "auto",
+              maxWidth: "500px",
+              // filter: "drop-shadow(0px 20px 40px rgba(0,0,0,0.06))",
+            }}
+          />
+        </Box>
       </Paper>
     </Box>
   );

@@ -52,7 +52,13 @@ const Sidebar = ({ drawerWidth }) => {
       icon: <AssignmentLateIcon />,
       subItems: [
         { text: "Pending Freelancers", path: "/requests/freelancers" },
+        { text: "Rejected Freelancers", path: "/rejected/freelancers" },
+        { text: "Blocked Freelancers", path: "/blocked/freelancers" },
+
         { text: "Pending Organizations", path: "/requests/organisations" },
+        { text: "Rejected Organizations", path: "/rejected/organisations" },
+        { text: "Blocked Organizations", path: "/blocked/organisations" },
+      
       ],
     },
 
