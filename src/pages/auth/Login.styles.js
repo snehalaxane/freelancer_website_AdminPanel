@@ -78,8 +78,7 @@
 import { styled, Box, Paper, TextField, keyframes } from "@mui/material";
 
 const PRIMARY_BLUE = "#1b2f74";
-
-// Animations for that "Real-time" feel
+// Animations for that "Real-tffime" feel
 const float = keyframes`
   0% { transform: translateY(0px); }
   50% { transform: translateY(-15px); }
@@ -95,7 +94,7 @@ export const BackgroundContainer = styled(Box)({
   height: "100vh",
   width: "100vw",
   display: "flex",
-  background: `linear-gradient(135deg, ${PRIMARY_BLUE} 0%, #fff 100%)`,
+  background: `linear-gradient(155deg, ${PRIMARY_BLUE} 0%, #fff 200%)`,
   overflow: "hidden",
   position: "relative",
 });
@@ -104,11 +103,12 @@ export const LeftHalf = styled(Box)({
   flex: 1.2,
   display: "flex",
   flexDirection: "column",
+  height: "100%",
   justifyContent: "center",
   alignItems: "center",
-  padding: "0 5%",
+  padding: "0 4%",
   zIndex: 2,
-  "@media (max-width: 1100px)": { display: "none" },
+  "@media (max-width: 1500px)": { display: "none" },
 });
 
 export const RightHalf = styled(Box)({
@@ -125,11 +125,11 @@ export const RightHalf = styled(Box)({
 // The "Boy" Illustration wrapper
 export const IllustrationWrapper = styled(Box)({
   width: "100%",
-  maxWidth: "500px",
+  maxWidth: "600px",
   animation: `${float} 4s ease-in-out infinite`,
-  marginBottom: "40px",
+  marginBottom: "1px",
   "& img": {
-    width: "100%",
+    width: "90%",
     filter: "drop-shadow(0 20px 30px rgba(0,0,0,0.3))",
   },
 });

@@ -115,30 +115,34 @@ const Login = () => {
       {/* LEFT SIDE: TEXT & LOGO */}
       <LeftHalf>
         {/* 1. Logo at the top left of the left section */}
-        <Box sx={{ position: "absolute", top: 40, left: 40, zIndex: 3 }}>
+        <Box sx={{ position: "absolute", top: 50, left: 40, zIndex: 3 }}>
           <Box component="img" src="/logo.png" sx={{ height: 95 }} />
         </Box>
 
         {/* 2. Main Illustration */}
         <IllustrationWrapper>
           <img
+            height="120%"
+            width="560%"
             src="https://illustrations.popsy.co/white/work-from-home.svg"
             alt="Character Illustration"
           />
         </IllustrationWrapper>
 
         {/* 3. Text Content */}
-        <Box sx={{ textAlign: "center", zIndex: 3 }}>
+        <Box sx={{ textAlign: "center", zIndex: 1 }}>
           <Typography
             variant="h3"
             sx={{
               fontWeight: 800,
-              color: "#fff",
-              mb: 2,
-              textShadow: "0px 4px 10px rgba(0,0,0,0.3)",
+              mb: 1,
+              background: "linear-gradient(90deg, #ff0000, #1b2f74, #ff0000)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              textShadow: "0px 0px 0px rgba(0,0,0,0.15)",
             }}
           >
-            Empowering <span style={{ color: "#ff0000" }}>Leadership.</span>
+            Empowering Leadership.
           </Typography>
 
           <Typography
@@ -149,7 +153,7 @@ const Login = () => {
               maxWidth: "500px",
               mx: "auto",
               borderLeft: "3px solid #ff0000",
-              pl: 2,
+              pl: 1,
             }}
           >
             Management is about arranging the stars. <br />

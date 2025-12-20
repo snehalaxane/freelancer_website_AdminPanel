@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from "react";
+// import axiosInstance from "../../services/axiosInstance";
+import publicAxios from "../../services/publicAxios";
+import { BackgroundContainer } from "../../components/common/BackgroundContainer";
+
 import {
   Box,
   Typography,
@@ -19,6 +23,9 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [timer, setTimer] = useState(0);
   const [loading, setLoading] = useState(false);
+  const isValidEmail = (value) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
 
   // --- TIMER LOGIC ---
   useEffect(() => {
@@ -34,37 +41,63 @@ const ForgotPassword = () => {
   }, [timer]);
 
   // --- HANDLERS ---
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email) return;
+    console.log("Submitting forgot password for:", email);
 
-    setLoading(true);
+    // --- VALIDATIONS ---
+    if (!email) {
+      alert("Email is required");
+      return;
+    }
 
-    // Simulate API Call
-    setTimeout(() => {
-      setLoading(false);
+    if (!isValidEmail(email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await publicAxios.post("/api/admin/forgot-password", {
+        email,
+      });
+      console.log("Forgot password response:", res.data);
+
+      // Success
       setIsSubmitted(true);
-      setTimer(60); // Start the 60s cooldown
-    }, 1500);
+      setTimer(60);
+    } catch (error) {
+      console.error("Forgot password error:", error);
+
+      alert(
+        error?.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleResend = () => {
-    setTimer(60);
-    // Add real API logic here
-    console.log("OTP Resent to:", email);
+  const handleResend = async () => {
+    try {
+      setLoading(true);
+      await publicAxios.post("/api/admin/forgot-password", { email });
+      setTimer(60);
+    } catch (error) {
+      console.error("error", error);
+      alert("Unable to resend email. Try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Box
+    <BackgroundContainer
       sx={{
-        height: "100vh",
-        width: "100vw",
-        display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        // backgroundColor: "#f4f7fe",
         p: 2,
-        overflow: "hidden",
       }}
     >
       <Paper
@@ -87,7 +120,7 @@ const ForgotPassword = () => {
             p: { xs: 4, md: 8 },
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
+            // justifyContent: "center",
             // backgroundColor: "#fff",
           }}
         >
@@ -255,7 +288,7 @@ const ForgotPassword = () => {
           />
         </Box>
       </Paper>
-    </Box>
+    </BackgroundContainer>
   );
 };
 

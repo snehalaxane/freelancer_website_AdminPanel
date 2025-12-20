@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import publicAxios from "../../services/publicAxios";
+import { BackgroundContainer } from "../../components/common/BackgroundContainer";
+
 import {
   Box,
   Typography,
@@ -9,6 +13,7 @@ import {
   IconButton,
   Fade,
 } from "@mui/material";
+
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -16,77 +21,96 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const ResetPassword = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  // 🔹 from reset link
+  const email = searchParams.get("email");
+
   // --- STATE ---
   const [showPassword, setShowPassword] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
-  const [passwords, setPasswords] = useState({ password: "", confirm: "" });
+  const [loading, setLoading] = useState(false);
 
-  // --- HANDLERS ---
+  const [form, setForm] = useState({
+    tempCode: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
   const handleChange = (e) => {
-    setPasswords({ ...passwords, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  // --- SUBMIT ---
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (passwords.password === passwords.confirm && passwords.password !== "") {
+
+    if (!email) {
+      alert("Invalid reset link");
+      return;
+    }
+
+    if (!form.tempCode) {
+      alert("Temporary password is required");
+      return;
+    }
+
+    if (form.newPassword !== form.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await publicAxios.post("/api/admin/reset-password", {
+        email,
+        tempCode: form.tempCode,
+        newPassword: form.newPassword,
+        confirmPassword: form.confirmPassword,
+      });
+
       setIsChanged(true);
-    } else {
-      alert("Passwords do not match!");
+    } catch (error) {
+      console.error("Reset password error:", error);
+      alert(
+        error?.response?.data?.message || "Unable to reset password. Try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        height: "100vh",
-        width: "100vw",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#fff", // Soft background to make the white container pop
-        p: 2,
-        overflow: "hidden",
-      }}
+    <BackgroundContainer
+      sx={{ alignItems: "center", justifyContent: "center", p: 2 }}
     >
       <Paper
-        elevation={0}
         sx={{
           display: "flex",
-          flexDirection: { xs: "column", md: "row" }, // Side-by-side on desktop
-          width: "100%",
-          maxWidth: "950px",
-          minHeight: "600px",
-          //   borderRadius: "32px",
-          overflow: "hidden",
-          //   boxShadow: "0px 30px 90px rgba(27, 47, 116, 0.1)",
+          flexDirection: { xs: "column", md: "row" },
+          maxWidth: 950,
+          minHeight: 600,
         }}
       >
-        {/* LEFT SIDE: ILLUSTRATION */}
+        {/* LEFT ILLUSTRATION */}
         <Box
           sx={{
             flex: 1.2,
-            // backgroundColor: "#fcfcff",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            p: 2,
-            // borderRight: { md: "1px solid #f0f3f9" },
           }}
         >
           <Box
             component="img"
-            src="/reset-password.gif" // Place your GIF in the public folder
-            alt="Reset Illustration"
-            sx={{
-              width: "120%",
-              height: "90%",
-              maxWidth: "550px",
-              //   filter: "drop-shadow(0px 20px 40px rgba(0,0,0,0.06))",
-            }}
+            src="/reset-password.gif"
+            sx={{ width: "120%", maxWidth: 550 }}
           />
         </Box>
 
-        {/* RIGHT SIDE: THE FORM */}
+        {/* RIGHT FORM */}
         <Box
           sx={{
             flex: 1,
@@ -94,183 +118,96 @@ const ResetPassword = () => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            // backgroundColor: "#fff",
           }}
         >
           {!isChanged ? (
-            <Fade in={!isChanged}>
-              <Box>
+            <Fade in>
+              <Box component="form" onSubmit={handleSubmit}>
                 <Typography
                   variant="h3"
-                  sx={{
-                    fontWeight: 800,
-                    color: "#1b2f74", // Navy Color
-                    mb: 1.5,
-                    fontSize: { xs: "2rem", md: "2.4rem" },
-                  }}
+                  sx={{ fontWeight: 800, color: "#1b2f74", mb: 2 }}
                 >
                   Reset Password
                 </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{ color: "#888", mb: 5, fontWeight: 500 }}
+
+                {/* TEMP PASSWORD */}
+                <TextField
+                  fullWidth
+                  required
+                  name="tempCode"
+                  type={showPassword ? "text" : "password"}
+                  value={form.tempCode}
+                  onChange={handleChange}
+                  placeholder="Enter temporary password"
+                  sx={{ mb: 3 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockOutlinedIcon />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    ),
+                  }}
+                />
+
+                {/* NEW PASSWORD */}
+                <TextField
+                  fullWidth
+                  required
+                  name="newPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={form.newPassword}
+                  onChange={handleChange}
+                  placeholder="Enter new password"
+                  sx={{ mb: 3 }}
+                />
+
+                {/* CONFIRM PASSWORD */}
+                <TextField
+                  fullWidth
+                  required
+                  name="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm new password"
+                  sx={{ mb: 4 }}
+                />
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  disabled={loading}
+                  sx={{
+                    py: 2,
+                    backgroundColor: "#ff0000",
+                    fontWeight: 700,
+                    "&:hover": { backgroundColor: "#d30000" },
+                  }}
                 >
-                  Create a new password to regain access to your account.
-                </Typography>
-
-                <Box component="form" onSubmit={handleSubmit}>
-                  {/* New Password Field */}
-
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 600, mb: 1, color: "#444" }}
-                  >
-                    Temporary Password
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    required
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    value={passwords.password}
-                    onChange={handleChange}
-                    placeholder="Enter temporary password"
-                    sx={{
-                      mb: 3,
-                      "& .MuiOutlinedInput-root": { borderRadius: "14px" },
-                    }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LockOutlinedIcon sx={{ color: "#1b2f74" }} />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 600, mb: 1, color: "#444" }}
-                  >
-                    New Password
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    required
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    value={passwords.password}
-                    onChange={handleChange}
-                    placeholder="Enter new password"
-                    sx={{
-                      mb: 3,
-                      "& .MuiOutlinedInput-root": { borderRadius: "14px" },
-                    }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LockOutlinedIcon sx={{ color: "#1b2f74" }} />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-
-                  {/* Confirm Password Field */}
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 600, mb: 1, color: "#444" }}
-                  >
-                    Confirm Password
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    required
-                    name="confirm"
-                    type={showPassword ? "text" : "password"}
-                    value={passwords.confirm}
-                    onChange={handleChange}
-                    placeholder="Confirm your password"
-                    sx={{
-                      mb: 4,
-                      "& .MuiOutlinedInput-root": { borderRadius: "14px" },
-                    }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-
-                  {/* Change Button - FF0000 */}
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    fullWidth
-                    sx={{
-                      py: 2,
-                      backgroundColor: "#ff0000", // Your Red Color
-                      borderRadius: "14px",
-                      textTransform: "none",
-                      fontSize: "1.1rem",
-                      fontWeight: 700,
-                      boxShadow: "0px 10px 20px rgba(255, 0, 0, 0.2)",
-                      "&:hover": { backgroundColor: "#d30000" },
-                    }}
-                  >
-                    Change Password
-                  </Button>
-                </Box>
+                  {loading ? "Updating..." : "Change Password"}
+                </Button>
               </Box>
             </Fade>
           ) : (
-            <Fade in={isChanged}>
-              <Box sx={{ textAlign: "center" }}>
+            <Fade in>
+              <Box textAlign="center">
                 <CheckCircleOutlineIcon
-                  sx={{ fontSize: 90, color: "#4caf50", mb: 2 }}
+                  sx={{ fontSize: 90, color: "#4caf50" }}
                 />
-                <Typography
-                  variant="h4"
-                  sx={{ fontWeight: 800, color: "#1b2f74", mb: 2 }}
-                >
-                  Success!
-                </Typography>
-                <Typography variant="body1" sx={{ color: "#666", mb: 4 }}>
-                  Your password has been reset. You can now log in safely.
+                <Typography variant="h4" sx={{ mt: 2, fontWeight: 800 }}>
+                  Password Reset Successful!
                 </Typography>
                 <Button
+                  sx={{ mt: 3 }}
                   variant="contained"
-                  fullWidth
-                  sx={{
-                    py: 2,
-                    backgroundColor: "#1b2f74",
-                    borderRadius: "14px",
-                    textTransform: "none",
-                    fontWeight: 700,
-                  }}
+                  onClick={() => navigate("/login")}
                 >
                   Back to Login
                 </Button>
@@ -280,19 +217,14 @@ const ResetPassword = () => {
 
           <Button
             startIcon={<ArrowBackIcon />}
-            sx={{
-              mt: 4,
-              alignSelf: "center",
-              color: "#888",
-              textTransform: "none",
-            }}
-            onClick={() => window.history.back()}
+            sx={{ mt: 4 }}
+            onClick={() => navigate(-1)}
           >
             Go Back
           </Button>
         </Box>
       </Paper>
-    </Box>
+    </BackgroundContainer>
   );
 };
 
