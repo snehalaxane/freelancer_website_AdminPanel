@@ -155,7 +155,7 @@ export const DecorativeShape = styled(Box)(
 export const LoginCard = styled(Paper)({
   padding: "48px",
   width: "100%",
-  maxWidth: "480px",
+  maxWidth: "580px",
   borderRadius: "28px",
   textAlign: "center",
   boxShadow: "0px 24px 48px rgba(0,0,0,0.4)",

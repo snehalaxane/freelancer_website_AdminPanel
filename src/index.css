@@ -1,7 +1,9 @@
 :root {
-  font-family: "Poppins", sans-serif;
+  /* font-family: "Poppins", sans-serif; */
   line-height: 1.5;
   font-weight: 400;
+  overflow-x: hidden; /* ✅ safe */
+  overflow-y: auto; /* ✅ allows dashboard scroll */
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);

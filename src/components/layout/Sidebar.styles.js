@@ -22,7 +22,7 @@ export const StyledDrawer = styled(Drawer)(({ width }) => ({
     borderRight: "none",
     overflowY: "auto", // Ensure the paper is the scroll container
     boxShadow: "4px 0px 20px rgba(0,0,0,0.15)",
-    "&::-webkit-scrollbar": { width: "4px" },
+    "&::-webkit-scrollbar": { width: "2px" },
     "&::-webkit-scrollbar-thumb": {
       backgroundColor: "rgba(255,255,255,0.15)",
       borderRadius: "10px",
@@ -53,7 +53,7 @@ export const NavButton = styled(
 )(({ active, accentcolor }) => ({
   borderRadius: "0 24px 24px 0",
   margin: "4px 16px 4px 0",
-  padding: "12px 24px",
+  padding: "5px 22px",
   transition: "all 0.25s ease-in-out",
   backgroundColor: active ? "rgba(255, 255, 255, 0.1)" : "transparent",
   borderLeft: `4px solid ${active ? accentcolor : "transparent"}`,
@@ -70,13 +70,13 @@ export const NavButton = styled(
     minWidth: "40px",
     transition: "all 0.2s ease-in-out",
     "& svg": {
-      fontSize: "22px",
+      fontSize: "19px",
       color: active ? accentcolor : "inherit",
     },
   },
 
   "& .MuiListItemText-root .MuiTypography-root": {
-    fontWeight: active ? 600 : 600,
+    fontWeight: active ? 200 : 300,
     letterSpacing: 0.5,
     fontSize: "0.890rem",
     color: active ? "#ffffff" : "inherit",
@@ -88,8 +88,8 @@ export const SubNavButton = styled(
   slotProps
 )(({ active, accentcolor }) => ({
   borderRadius: "8px",
-  margin: "2px 20px 2px 48px",
-  padding: "8px 16px",
+  margin: "2px 2px 2px 42px",
+  padding: "2px 2px",
   transition: "all 0.2s ease",
   backgroundColor: active ? "rgba(255, 255, 255, 0.03)" : "transparent",
 
@@ -101,7 +101,7 @@ export const SubNavButton = styled(
   "& .MuiTypography-root": {
     fontSize: "0.890rem",
     letterSpacing: 0.5,
-    fontWeight: active ? 600 : 600,
+    fontWeight: active ? 200 : 300,
     color: active ? accentcolor : "hsla(0, 0%, 100%, 1.00)",
   },
 }));

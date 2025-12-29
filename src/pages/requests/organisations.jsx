@@ -10,6 +10,8 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Breadcrumbs,
+  Link,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
@@ -102,12 +104,21 @@ const Organisations = () => {
   }
 
   return (
-    <Box p={4} sx={{ minHeight: "100vh" }}>
+    <Box p={1}>
+      {/* Header with Breadcrumbs and Gradient Title */}
       <Box mb={3}>
+        <Breadcrumbs sx={{ mb: 1, fontSize: "0.9rem" }}>
+          <Link underline="hover" color="inherit" href="/dashboard">
+            Dashboard
+          </Link>
+          <Typography color="text.primary" sx={{ fontSize: "0.9rem" }}>
+            User Requests
+          </Typography>
+        </Breadcrumbs>
         <Typography
           variant="h5"
           sx={{
-            fontWeight: 800,
+            fontWeight: 700,
             letterSpacing: "-0.02em",
             background: "linear-gradient(45deg, #1b2f74 30%, #ff0000 90%)",
             WebkitBackgroundClip: "text",
@@ -124,7 +135,23 @@ const Organisations = () => {
       </Box>
 
       {/* 4. Use your CommonTable */}
-      <CommonTable columns={columns} rows={companies} renderRow={renderRow} />
+      {/* 4. Responsive Table Wrapper */}
+      <Box
+        sx={{
+          width: "100%",
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        {/* Force width so horizontal scroll appears on mobile */}
+        <Box sx={{ minWidth: 900 }}>
+          <CommonTable
+            columns={columns}
+            rows={companies}
+            renderRow={renderRow}
+          />
+        </Box>
+      </Box>
     </Box>
   );
 };

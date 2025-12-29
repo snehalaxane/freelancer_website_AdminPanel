@@ -7,7 +7,7 @@ const Dashboard = () => {
     <Paper sx={{ p: 3 }}>
       <Typography variant="h4">Dashboard</Typography>
       <Typography mt={2}>
-        Sidebar and Header should now be visible 🎉
+        {/* Sidebar and Header should now be visible 🎉 */}
       </Typography>
     </Paper>
   );

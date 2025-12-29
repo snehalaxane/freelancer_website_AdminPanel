@@ -4,6 +4,7 @@ import { Chip } from "@mui/material";
 const colorMap = {
   inactive: { bg: "#f1f5f9", text: "#64748b", label: "Inactive" },
   approved: { bg: "#ecfdf5", text: "#059669", label: "Approved" },
+  active: { bg: "#ecfdf5", text: "#059669", label: "Active" },
   rejected: { bg: "#fef2f2", text: "#dc2626", label: "Rejected" },
   blocked: { bg: "#fff7ed", text: "#ea580c", label: "Blocked" },
   pending: { bg: "#fefce8", text: "#ca8a04", label: "Pending" },

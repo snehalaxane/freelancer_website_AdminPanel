@@ -19,8 +19,16 @@
 // export default AuthLayout;
 
 import { Outlet } from "react-router-dom";
+import { useEffect } from "react";
 
 const AuthLayout = () => {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
   return <Outlet />;
 };
 

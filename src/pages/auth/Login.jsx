@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axiosInstance from "../../services/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { useNotification } from "../../context/NotificationContext";
 import {
   Box,
   Typography,
@@ -30,58 +31,53 @@ const PRIMARY_BLUE = "#1b2f74";
 const ACCENT_RED = "#ff0000";
 
 const Login = () => {
+  const { showNotification } = useNotification();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [toast, setToast] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
-  const handleCloseToast = () => setToast((prev) => ({ ...prev, open: false }));
+ 
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     if (!form.email || !form.password) {
-      setToast({
-        open: true,
-        message: "Email and password are required",
-        severity: "warning",
-      });
+      showNotification("Email and password are required", "warning");
       return;
     }
+
     setLoading(true);
+
     try {
       const payload = {
         email: form.email.trim(),
         password: form.password.trim(),
       };
+
       const response = await axiosInstance.post("/api/admin/login", payload);
       const data = response.data;
-      if (!data.token) throw new Error("Invalid login credentials");
+
+      if (!data.token) {
+        throw new Error("Invalid login credentials");
+      }
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("adminEmail", form.email);
       localStorage.setItem("admin", JSON.stringify(data.admin));
 
-      setToast({
-        open: true,
-        message: "Login successful! Redirecting...",
-        severity: "success",
-      });
-      setTimeout(() => navigate("/dashboard", { replace: true }), 800);
+      showNotification("Login successful", "success");
+
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 800);
     } catch (error) {
-      setToast({
-        open: true,
-        message:
-          error.response?.data?.message || error.message || "Login failed",
-        severity: "error",
-      });
+      showNotification(
+        error?.response?.data?.message || "Invalid email or password",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -171,7 +167,7 @@ const Login = () => {
               bgcolor: "#f1f5f9",
               color: PRIMARY_BLUE,
               width: 60,
-              height: 60,
+              height: 40,
             }}
           >
             <LockOutlinedIcon fontSize="large" />
@@ -315,6 +311,9 @@ const Login = () => {
                 fontWeight: 700,
                 fontSize: "1rem",
                 textTransform: "none",
+                display: "flex", // 👈 IMPORTANT
+                alignItems: "center", // 👈 vertical center
+                justifyContent: "center", // 👈 horizontal center
                 transition: "all 0.3s",
                 "&:hover": {
                   bgcolor: ACCENT_RED,
@@ -334,21 +333,7 @@ const Login = () => {
       </RightHalf>
 
       {/* SNACKBAR */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={4000}
-        onClose={handleCloseToast}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseToast}
-          severity={toast.severity}
-          variant="filled"
-          sx={{ borderRadius: "12px" }}
-        >
-          {toast.message}
-        </Alert>
-      </Snackbar>
+     
     </BackgroundContainer>
   );
 };
