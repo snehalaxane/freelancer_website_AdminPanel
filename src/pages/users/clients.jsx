@@ -9,6 +9,7 @@ import {
   StyledTableRow,
   TableWrapper,
 } from "../../components/common/Table/table.styles";
+import CommonPagination from "../../components/common/Pagination/CommonPagination";
 
 const PRIMARY_BLUE = "#1b2f74";
 
@@ -17,6 +18,13 @@ const Clients = () => {
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 20;
+
+  const paginatedClients = clients.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -45,7 +53,7 @@ const Clients = () => {
   return (
     <Box p={1}>
       {/* Header with Breadcrumbs and Gradient Title */}
-      <Box mb={3}>
+      <Box mb={2}>
         <Breadcrumbs sx={{ mb: 1, fontSize: "0.9rem" }}>
           <Link underline="hover" color="inherit" href="/dashboard">
             Dashboard
@@ -67,7 +75,7 @@ const Clients = () => {
 
             // Smooth rendering
             display: "inline-block",
-            mb: 1,
+            // mb: 1,
           }}
         >
           Clients
@@ -90,11 +98,11 @@ const Clients = () => {
             <TableWrapper>
               <CommonTable
                 columns={columns}
-                rows={clients}
+                rows={paginatedClients}
                 renderRow={(client, index) => (
                   <StyledTableRow key={client._id || index}>
                     <BodyCell sx={{ fontWeight: 600, color: PRIMARY_BLUE }}>
-                      {String(index + 1).padStart(2)}
+                      {(page - 1) * rowsPerPage + index + 1}
                     </BodyCell>
                     <BodyCell sx={{ fontWeight: 500 }}>
                       {client.firstName} {client.lastName}
@@ -130,6 +138,12 @@ const Clients = () => {
                 )}
               />
             </TableWrapper>
+            <CommonPagination
+              totalItems={clients.length}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              onPageChange={setPage}
+            />
           </Box>
         </Box>
 

@@ -36,7 +36,6 @@ const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
- 
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -160,180 +159,212 @@ const Login = () => {
 
       {/* RIGHT SIDE: LOGIN FORM */}
       <RightHalf>
-        <LoginCard elevation={0}>
-          <Avatar
+        <Box
+          sx={{
+            width: "90%",
+            display: "flex",
+            flexDirection: "column", // 👈 STACK VERTICALLY
+            alignItems: "center",
+          }}
+        >
+          {/* ✅ MOBILE LOGO */}
+          <Box
             sx={{
-              m: "0 auto 16px",
-              bgcolor: "#f1f5f9",
-              color: PRIMARY_BLUE,
-              width: 60,
-              height: 40,
+              display: { xs: "flex", md: "none" },
+              justifyContent: "center",
+              mb: 1,
+
+              width: "100%",
             }}
           >
-            <LockOutlinedIcon fontSize="large" />
-          </Avatar>
-
-          <Typography variant="h4" fontWeight={800} color={PRIMARY_BLUE} mb={1}>
-            Welcome Back
-          </Typography>
-          <Typography color="text.secondary" mb={4}>
-            Enter your credentials to access the admin panel
-          </Typography>
-
-          <Box display="flex" gap={2} mb={3}>
-            <Button
-              fullWidth
-              variant="outlined"
-              startIcon={<Google />}
-              sx={{
-                borderRadius: "10px",
-                py: 1,
-                textTransform: "none",
-                borderColor: "#e2e8f0",
-                color: "#64748b",
-              }}
-            >
-              Google
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              startIcon={<Apple />}
-              sx={{
-                borderRadius: "10px",
-                py: 1,
-                textTransform: "none",
-                borderColor: "#e2e8f0",
-                color: "#64748b",
-              }}
-            >
-              Apple
-            </Button>
-          </Box>
-
-          <Divider sx={{ my: 3, fontSize: "0.75rem", color: "text.secondary" }}>
-            OR LOGIN WITH EMAIL
-          </Divider>
-
-          <Box component="form" onSubmit={handleLogin} textAlign="left">
-            <Typography variant="body2" fontWeight={700} mb={1} ml={0.5}>
-              Email Address
-            </Typography>
-            <StyledTextField
-              fullWidth
-              name="email"
-              type="email"
-              placeholder="admin@gmail.com"
-              value={form.email}
-              onChange={handleChange}
-              required
-              sx={{ mb: 2.5 }}
-            />
-
-            <Typography variant="body2" fontWeight={700} mb={1} ml={0.5}>
-              Password
-            </Typography>
-            <StyledTextField
-              fullWidth
-              name="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              required
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      size="small"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-
             <Box
+              component="img"
+              src="/logo.png"
+              alt="Logo"
+              sx={{ height: 60 }}
+            />
+          </Box>
+          <LoginCard elevation={0}>
+            <Avatar
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mt: 1,
-                mb: 4,
+                m: "0 auto 16px",
+                bgcolor: "#f1f5f9",
+                color: PRIMARY_BLUE,
+                width: 60,
+                height: 40,
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <input
-                  type="checkbox"
-                  id="remember"
-                  style={{
-                    accentColor: PRIMARY_BLUE,
-                    cursor: "pointer",
-                    width: 16,
-                    height: 16,
-                  }}
-                />
-                <Typography
-                  component="label"
-                  htmlFor="remember"
-                  variant="body2"
-                  sx={{ ml: 1, cursor: "pointer", color: "text.secondary" }}
-                >
-                  Remember me
-                </Typography>
-              </Box>
-              <Link
-                component="button"
-                type="button"
-                variant="body2"
-                onClick={() => navigate("/forgot-password")}
+              <LockOutlinedIcon fontSize="large" />
+            </Avatar>
+
+            <Typography
+              variant="h4"
+              fontWeight={800}
+              color={PRIMARY_BLUE}
+              mb={1}
+            >
+              Welcome Back
+            </Typography>
+            <Typography color="text.secondary" mb={4}>
+              Enter your credentials to access the admin panel
+            </Typography>
+
+            <Box display="flex" gap={2} mb={3}>
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<Google />}
                 sx={{
-                  color: PRIMARY_BLUE,
-                  fontWeight: 700,
-                  textDecoration: "none",
+                  borderRadius: "10px",
+                  py: 1,
+                  textTransform: "none",
+                  borderColor: "#e2e8f0",
+                  color: "#64748b",
                 }}
               >
-                Forgot password?
-              </Link>
+                Google
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<Apple />}
+                sx={{
+                  borderRadius: "10px",
+                  py: 1,
+                  textTransform: "none",
+                  borderColor: "#e2e8f0",
+                  color: "#64748b",
+                }}
+              >
+                Apple
+              </Button>
             </Box>
 
-            <Button
-              type="submit"
-              fullWidth
-              disabled={loading}
-              sx={{
-                py: 1.8,
-                bgcolor: PRIMARY_BLUE,
-                color: "#fff",
-                borderRadius: "12px",
-                fontWeight: 700,
-                fontSize: "1rem",
-                textTransform: "none",
-                display: "flex", // 👈 IMPORTANT
-                alignItems: "center", // 👈 vertical center
-                justifyContent: "center", // 👈 horizontal center
-                transition: "all 0.3s",
-                "&:hover": {
-                  bgcolor: ACCENT_RED,
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 8px 16px rgba(255,0,0,0.2)",
-                },
-              }}
+            <Divider
+              sx={{ my: 3, fontSize: "0.75rem", color: "text.secondary" }}
             >
-              {loading ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Sign In to Dashboard"
-              )}
-            </Button>
-          </Box>
-        </LoginCard>
+              OR LOGIN WITH EMAIL
+            </Divider>
+
+            <Box component="form" onSubmit={handleLogin} textAlign="left">
+              <Typography variant="body2" fontWeight={700} mb={1} ml={0.5}>
+                Email Address
+              </Typography>
+              <StyledTextField
+                fullWidth
+                name="email"
+                type="email"
+                placeholder="admin@gmail.com"
+                value={form.email}
+                onChange={handleChange}
+                required
+                sx={{ mb: 2.5 }}
+              />
+
+              <Typography variant="body2" fontWeight={700} mb={1} ml={0.5}>
+                Password
+              </Typography>
+              <StyledTextField
+                fullWidth
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={form.password}
+                onChange={handleChange}
+                required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        size="small"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mt: 1,
+                  mb: 4,
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <input
+                    type="checkbox"
+                    id="remember"
+                    style={{
+                      accentColor: PRIMARY_BLUE,
+                      cursor: "pointer",
+                      width: 16,
+                      height: 16,
+                    }}
+                  />
+                  <Typography
+                    component="label"
+                    htmlFor="remember"
+                    variant="body2"
+                    sx={{ ml: 1, cursor: "pointer", color: "text.secondary" }}
+                  >
+                    Remember me
+                  </Typography>
+                </Box>
+                <Link
+                  component="button"
+                  type="button"
+                  variant="body2"
+                  onClick={() => navigate("/forgot-password")}
+                  sx={{
+                    color: PRIMARY_BLUE,
+                    fontWeight: 700,
+                    textDecoration: "none",
+                  }}
+                >
+                  Forgot password?
+                </Link>
+              </Box>
+
+              <Button
+                type="submit"
+                fullWidth
+                disabled={loading}
+                sx={{
+                  py: 1.8,
+                  bgcolor: PRIMARY_BLUE,
+                  color: "#fff",
+                  borderRadius: "12px",
+                  fontWeight: 700,
+                  fontSize: "1rem",
+                  textTransform: "none",
+                  display: "flex", // 👈 IMPORTANT
+                  alignItems: "center", // 👈 vertical center
+                  justifyContent: "center", // 👈 horizontal center
+                  transition: "all 0.3s",
+                  "&:hover": {
+                    bgcolor: ACCENT_RED,
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 8px 16px rgba(255,0,0,0.2)",
+                  },
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Sign In to Dashboard"
+                )}
+              </Button>
+            </Box>
+          </LoginCard>
+        </Box>
       </RightHalf>
 
       {/* SNACKBAR */}
-     
     </BackgroundContainer>
   );
 };

@@ -19,6 +19,7 @@ export const TableWrapper = styled(Box)({
   backgroundColor: "#fff",
   border: "1px solid #e2e8f0",
   width: "100%",
+  overflowX: "auto",
 
   // Custom Scrollbar
   "&::-webkit-scrollbar": { width: "6px" },
@@ -39,12 +40,17 @@ export const StyledTableHead = styled(TableHead)({
   },
 });
 
-export const StyledTable = styled(Table)({
+export const StyledTable = styled(Table)(({ theme }) => ({
   minWidth: "100%", // Ensures it always fills the container
   tableLayout: "fixed", // Forces consistent column spacing
   borderCollapse: "separate",
   borderSpacing: "0",
-});
+
+  [theme.breakpoints.down("md")]: {
+    minWidth: 900, // forces horizontal scroll
+    tableLayout: "auto", // ONLY on mobile
+  },
+}));
 
 export const HeadCell = styled(TableCell)({
   fontWeight: 700,

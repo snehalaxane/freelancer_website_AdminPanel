@@ -21,7 +21,7 @@ import {
   PersonAdd,
   PeopleAltOutlined,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 import CommonTable from "../../components/common/Table/CommonTable";
 import StatusChip from "../../components/common/StatusChip";
@@ -86,7 +86,7 @@ const PRIMARY_CUSTOM_COLOR = "#1b2f74";
 /* ---------------- Status Chip ---------------- */
 
 export default function UserListPage() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [users] = useState(initialUsers);
   const [openPerm, setOpenPerm] = useState(false);
@@ -144,7 +144,7 @@ export default function UserListPage() {
   );
 
   return (
-    <Container maxWidth="s" sx={{ p: { xs: 5, md: 2 } }}>
+    <Container maxWidth="s" sx={{ p: { xs: 5, md: 1 } }}>
       {/* Header */}
       <Box
         display="flex"

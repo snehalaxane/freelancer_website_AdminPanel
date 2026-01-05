@@ -29,7 +29,8 @@ const float = keyframes`
 
 const ResetPassword = () => {
   const navigate = useNavigate();
-  const email = localStorage.getItem("resetEmail");
+  const email = localStorage.getItem("resetEmail")?.trim();
+  console.log("Email from localStorage:", email);
 
   const [show, setShow] = useState({
     tempCode: false,
@@ -95,9 +96,16 @@ const ResetPassword = () => {
       alert("Password does not meet security requirements.");
       return;
     }
+    console.log("Reset payload:", {
+      email,
+      tempCode: form.tempCode,
+      newPassword: form.newPassword,
+      confirmPassword: form.confirmPassword,
+    });
 
     try {
       setLoading(true);
+
       await publicAxios.post("/api/admin/reset-password", {
         email,
         tempCode: form.tempCode,
@@ -365,3 +373,149 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+
+// import React, { useState } from "react";
+// import { useNavigate } from "react-router-dom";
+// import publicAxios from "../../services/publicAxios";
+
+// import {
+//   Box,
+//   Typography,
+//   TextField,
+//   Button,
+//   InputAdornment,
+//   Paper,
+//   IconButton,
+//   Fade,
+//   keyframes,
+// } from "@mui/material";
+
+// import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+// import Visibility from "@mui/icons-material/Visibility";
+// import VisibilityOff from "@mui/icons-material/VisibilityOff";
+// import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+// import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
+// // --- ANIMATIONS ---
+// const float = keyframes`
+//   0% { transform: translateY(0px); }
+//   50% { transform: translateY(-15px); }
+//   100% { transform: translateY(0px); }
+// `;
+
+// const ResetPassword = () => {
+//   const navigate = useNavigate();
+//   const email = localStorage.getItem("resetEmail")?.trim();
+//   console.log("Email from localStorage:", email);
+
+//   const [show, setShow] = useState({
+//     tempCode: false,
+//     newPassword: false,
+//     confirmPassword: false,
+//   });
+
+//   const toggleShow = (field) => {
+//     setShow((prev) => ({ ...prev, [field]: !prev[field] }));
+//   };
+
+//   const [isChanged, setIsChanged] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const PASSWORD_REGEX =
+//     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+
+//   const [form, setForm] = useState({
+//     tempCode: "",
+//     newPassword: "",
+//     confirmPassword: "",
+//   });
+
+//   const [errors, setErrors] = useState({
+//     newPassword: "",
+//     confirmPassword: "",
+//   });
+
+//     if (name === "confirmPassword") {
+//       if (value !== form.newPassword) {
+//         setErrors((prev) => ({
+//           ...prev,
+//           confirmPassword: "Passwords do not match",
+//         }));
+//       } else {
+//         setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+//       }
+//     }
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (!email) {
+//       alert("Reset session expired. Please request password reset again.");
+//       navigate("/forgot-password");
+//       return;
+//     }
+//     if (!PASSWORD_REGEX.test(form.newPassword)) {
+//       alert("Password does not meet security requirements.");
+//       return;
+//     }
+
+//                       fontWeight: 700,
+//                       textTransform: "none",
+//                       fontSize: "1rem",
+//                       "&:hover": { backgroundColor: "#14235a" },
+//                     }}
+//                   >
+//                     {loading ? "Updating..." : "Reset Password"}
+//                   </Button>
+//                 </Box>
+//               </Box>
+//             </Fade>
+//           ) : (
+//             <Fade in={isChanged}>
+//               <Box sx={{ textAlign: "center", py: 4 }}>
+//                 <CheckCircleOutlineIcon
+//                   sx={{ fontSize: 90, color: "#4caf50", mb: 2 }}
+//                 />
+//                 <Typography variant="h4" sx={{ fontWeight: 800, mb: 2 }}>
+//                   All Set!
+//                 </Typography>
+//                 <Typography sx={{ color: "#666", mb: 4 }}>
+//                   Your password has been reset successfully. <br /> You can now
+//                   login with your new credentials.
+//                 </Typography>
+//                 <Button
+//                   fullWidth
+//                   variant="contained"
+//                   onClick={() => navigate("/login")}
+//                   sx={{
+//                     py: 2,
+//                     borderRadius: "14px",
+//                     fontWeight: 700,
+//                     backgroundColor: "#1b2f74",
+//                   }}
+//                 >
+//                   Continue to Login
+//                 </Button>
+//               </Box>
+//             </Fade>
+//           )}
+
+//           <Button
+//             startIcon={<ArrowBackIcon />}
+//             onClick={() => navigate(-1)}
+//             sx={{
+//               mt: 3,
+//               textTransform: "none",
+//               color: "#1b2f74",
+//               fontWeight: 700,
+//               width: "100%",
+//             }}
+//           >
+//             Go Back
+//           </Button>
+//         </Paper>
+//       </Box>
+//     </BackgroundContainer>
+//   );
+// };
+
+// export default ResetPassword;

@@ -14,8 +14,7 @@ import {
   Link,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-
-// Import your CommonTable and Styled Components
+import CommonPagination from "../../components/common/Pagination/CommonPagination";
 import CommonTable from "../../components/common/Table/CommonTable"; // Adjust path as needed
 import {
   BodyCell,
@@ -23,6 +22,9 @@ import {
 } from "../../components/common/Table/table.styles"; // Adjust path as needed
 
 const Organisations = () => {
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 20;
+
   const [companies, setCompanies] = useState([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,11 @@ const Organisations = () => {
     "Status",
     "Actions",
   ];
+
+  const paginatedCategories = companies.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
 
   // 2. Fetch Data
   useEffect(() => {
@@ -55,7 +62,9 @@ const Organisations = () => {
   // 3. Define how to render each row
   const renderRow = (company, index) => (
     <StyledTableRow key={company._id}>
-      <BodyCell sx={{ width: "60px" }}>{index + 1}</BodyCell>
+      <BodyCell sx={{ width: "60px" }}>
+        {(page - 1) * rowsPerPage + index + 1}
+      </BodyCell>
 
       <BodyCell>
         <Box display="flex" justifyContent="center">
@@ -112,7 +121,7 @@ const Organisations = () => {
             Dashboard
           </Link>
           <Typography color="text.primary" sx={{ fontSize: "0.9rem" }}>
-            User Requests
+            Users Request
           </Typography>
         </Breadcrumbs>
         <Typography
@@ -127,7 +136,7 @@ const Organisations = () => {
             mb: 1,
           }}
         >
-          Organization Requests
+          Organizations Request
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Manage and verify registered company profiles
@@ -147,10 +156,17 @@ const Organisations = () => {
         <Box sx={{ minWidth: 900 }}>
           <CommonTable
             columns={columns}
-            rows={companies}
+            rows={paginatedCategories}
             renderRow={renderRow}
           />
         </Box>
+
+        <CommonPagination
+          totalItems={companies.length}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={setPage}
+        />
       </Box>
     </Box>
   );

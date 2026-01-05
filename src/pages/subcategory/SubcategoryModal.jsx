@@ -21,6 +21,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import axiosInstance from "../../services/axiosInstance";
+import { useNotification } from "../../context/NotificationContext";
 
 const BRAND_NAVY = "#1b2f74";
 const BRAND_RED = "#ff0000";
@@ -81,16 +82,15 @@ const SubcategoryModal = ({ open, onClose, editData, onSuccess }) => {
     image: null,
     bannerImage: null,
     status: true,
-    seo: { metaTitle: "", metaKeywords: "", metaDescription: "" },
+   seo: { metaTitle: "", metaKeywords: "", metaDescription: "" },
   });
+
   const [imagePreview, setImagePreview] = useState("");
   const [bannerPreview, setBannerPreview] = useState("");
   const isEdit = Boolean(editData);
   const [categories, setCategories] = useState([]);
-  const [tempSubcategoryId, setTempSubcategoryId] = useState(
-    localStorage.getItem("subcategoryId")
-  );
-  const canEditSEO = isEdit || Boolean(tempSubcategoryId);
+
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -109,28 +109,31 @@ const SubcategoryModal = ({ open, onClose, editData, onSuccess }) => {
     if (editData) {
       setForm({
         ...editData,
-        categoryId: editData.categoryId?._id,
-
+        categoryId: editData.categoryId?._id || "",
         image: null,
         bannerImage: null,
-        seo: editData.seo || {
-          metaTitle: "",
-          metaKeywords: "",
-          metaDescription: "",
+        seo: {
+           metaTitle: editData.seo?.metaTitle || "",
+        metaKeywords: Array.isArray(editData.seo?.metaKeywords)
+          ? editData.seo.metaKeywords
+          : [],
+        metaDescription: editData.seo?.metaDescription || "",
         },
       });
+
       setImagePreview(editData.image || "");
       setBannerPreview(editData.bannerImage || "");
     } else {
       setForm({
         name: "",
-        categoryId: { name: "" },
+        categoryId: "",
         description: "",
         image: null,
         bannerImage: null,
         status: true,
         seo: { metaTitle: "", metaKeywords: "", metaDescription: "" },
       });
+
       setImagePreview("");
       setBannerPreview("");
     }
@@ -142,8 +145,6 @@ const SubcategoryModal = ({ open, onClose, editData, onSuccess }) => {
   };
 
   const handleCloseModal = () => {
-    localStorage.removeItem("subcategoryId");
-    setTempSubcategoryId(null);
     onClose();
   };
 
@@ -168,66 +169,52 @@ const SubcategoryModal = ({ open, onClose, editData, onSuccess }) => {
     setForm((prev) => ({ ...prev, [type]: file }));
   };
 
-  const handleSaveBasicInfo = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("name", form.name);
-      formData.append("categoryId", form.categoryId);
-      formData.append("description", form.description);
-      if (form.image) formData.append("image", form.image);
-      if (form.bannerImage) formData.append("bannerImage", form.bannerImage);
+  const handleSaveSubcategory = async () => {
+  try {
+    const formData = new FormData();
 
-      let res;
+    formData.append("name", form.name);
+    formData.append("categoryId", form.categoryId);
+    formData.append("description", form.description);
+    formData.append("status", form.status);
 
-      if (isEdit) {
-        res = await axiosInstance.put(
-          `/api/admin/subcategories/${editData._id}`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-      } else {
-        res = await axiosInstance.post("/api/admin/subcategories", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+    if (form.image) formData.append("image", form.image);
+    if (form.bannerImage) formData.append("bannerImage", form.bannerImage);
 
-        const createdId = res.data?.data?._id || res.data?._id;
+    // SEO as JSON
+   formData.append("metaTitle", form.seo.metaTitle);
+formData.append("metaKeywords", Array.isArray(form.seo.metaKeywords)
+  ? form.seo.metaKeywords.join(",")
+  : form.seo.metaKeywords);
+formData.append("metaDescription", form.seo.metaDescription);
 
-        // 🔥 STORE TEMP ID
-        localStorage.setItem("subcategoryId", createdId);
-        setTempSubcategoryId(createdId);
-      }
 
-      onSuccess();
-      alert("Subcategory basic info saved!");
-    } catch (err) {
-      alert("Error saving basic info" + err);
-    }
-  };
 
-  const handleSaveSEO = async () => {
-    const subcategoryId = editData?._id || tempSubcategoryId;
-
-    if (!subcategoryId) {
-      alert("Please create subcategory first.");
-      return;
-    }
-
-    try {
+    if (isEdit) {
       await axiosInstance.put(
-        `/api/admin/subcategories/${subcategoryId}/seo`,
-        form.seo
+        `/api/admin/subcategories/${editData._id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
-
-      // ✅ clear after SEO save
-      localStorage.removeItem("subcategoryId");
-      setTempSubcategoryId(null);
-
-      onSuccess();
-      alert("SEO Metadata saved!");
-    } catch (err) {
-      alert("Error saving SEO data" + err);
+    } else {
+      await axiosInstance.post("/api/admin/subcategories", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
     }
-  };
+
+    onSuccess();
+    showNotification(
+      isEdit
+        ? "Subcategory & SEO updated successfully"
+        : "Subcategory & SEO created successfully",
+      "success"
+    );
+  } catch (error) {
+    console.error(error);
+    showNotification("Failed to save subcategory", "error");
+  }
+};
+
 
   return (
     <Dialog
@@ -499,28 +486,7 @@ const SubcategoryModal = ({ open, onClose, editData, onSuccess }) => {
               </Grid>
             </Grid>
           </Grid>
-          <Button
-            variant="contained"
-            startIcon={<SaveIcon />}
-            onClick={handleSaveBasicInfo}
-            sx={{
-              bgcolor: BRAND_NAVY,
-              px: 3,
-              ml: 80,
-              "&:hover": { bgcolor: "#122152" },
-              borderRadius: "8px",
-            }}
-          >
-            {isEdit ? "Update" : "Create"}
-          </Button>
         </Paper>
-
-        {/* SECTION 2: SEO INFO */}
-        {!canEditSEO && (
-          <Typography color="error" mb={2}>
-            Please create subcategory first to add SEO information.
-          </Typography>
-        )}
 
         <Paper
           elevation={3}
@@ -529,8 +495,6 @@ const SubcategoryModal = ({ open, onClose, editData, onSuccess }) => {
             borderRadius: 3,
             position: "relative",
             overflow: "hidden",
-            opacity: canEditSEO ? 1 : 0.5,
-            pointerEvents: canEditSEO ? "auto" : "none",
           }}
         >
           <Box
@@ -551,7 +515,7 @@ const SubcategoryModal = ({ open, onClose, editData, onSuccess }) => {
             mb={3}
           >
             <Typography variant="h6" color={BRAND_RED} fontWeight="bold">
-              SEO  METADATA
+              SEO METADATA
             </Typography>
           </Box>
           <Divider sx={{ mb: 4 }} />
@@ -567,21 +531,13 @@ const SubcategoryModal = ({ open, onClose, editData, onSuccess }) => {
                 onChange={handleSeoChange}
                 helperText={`${form.seo?.metaTitle?.length || 0}/90 characters`}
               />
-              <KeywordsInput
-                value={
-                  Array.isArray(form.seo?.metaKeywords)
-                    ? form.seo.metaKeywords
-                    : form.seo?.metaKeywords
-                    ? form.seo.metaKeywords.split(",")
-                    : []
-                }
-                onChange={(newKeywords) =>
-                  setForm({
-                    ...form,
-                    seo: { ...form.seo, metaKeywords: newKeywords.join(",") },
-                  })
-                }
-              />
+             <KeywordsInput
+  value={form.seo.metaKeywords}
+  onChange={(newKeywords) =>
+    setForm({ ...form, seo: { ...form.seo, metaKeywords: newKeywords } })
+  }
+/>
+
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
@@ -602,16 +558,19 @@ const SubcategoryModal = ({ open, onClose, editData, onSuccess }) => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={handleSaveSEO}
+            onClick={handleSaveSubcategory}
             sx={{
               bgcolor: BRAND_RED,
               px: 3,
-              ml: 80,
+              ml: { xs: 0, md: 80 }, // ✅ FIX
+              mt: { xs: 2, md: 0 },
+              display: "flex",
+              justifyContent: "center",
               "&:hover": { bgcolor: "#ff0000" },
               borderRadius: "8px",
             }}
           >
-            {isEdit ? "Update " : "Create "}
+            {isEdit ? "Update" : "Create"}
           </Button>
         </Paper>
 

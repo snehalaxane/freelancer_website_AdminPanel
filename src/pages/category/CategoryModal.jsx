@@ -21,6 +21,7 @@
 // import CloseIcon from "@mui/icons-material/Close";
 // import SaveIcon from "@mui/icons-material/Save";
 // import axiosInstance from "../../services/axiosInstance";
+// import { useNotification } from "../../context/NotificationContext";
 
 // const BRAND_NAVY = "#1b2f74";
 // const BRAND_RED = "#ff0000";
@@ -84,7 +85,10 @@
 //   });
 //   const [imagePreview, setImagePreview] = useState("");
 //   const [bannerPreview, setBannerPreview] = useState("");
+//   const [categoryId, setCategoryId] = useState(null);
 //   const isEdit = Boolean(editData);
+//   const canEditSEO = isEdit || Boolean(categoryId);
+//   const { showNotification } = useNotification();
 
 //   useEffect(() => {
 //     if (editData) {
@@ -98,8 +102,12 @@
 //           metaDescription: "",
 //         },
 //       });
+
 //       setImagePreview(editData.image || "");
 //       setBannerPreview(editData.bannerImage || "");
+
+//       // ✅ EDIT MODE → allow SEO
+//       setCategoryId(editData._id);
 //     } else {
 //       setForm({
 //         name: "",
@@ -109,8 +117,13 @@
 //         status: true,
 //         seo: { metaTitle: "", metaKeywords: "", metaDescription: "" },
 //       });
+
 //       setImagePreview("");
 //       setBannerPreview("");
+
+//       // ✅ ADD MODE → block SEO
+//       setCategoryId(null);
+//       localStorage.removeItem("categoryId");
 //     }
 //   }, [editData, open]);
 
@@ -120,9 +133,9 @@
 //   };
 
 //   const handleCloseModal = () => {
-//   localStorage.removeItem("categoryId");
-//   onClose();
-// };
+//     localStorage.removeItem("categoryId");
+//     onClose();
+//   };
 
 //   const handleSeoChange = (e) => {
 //     const { name, value } = e.target;
@@ -172,41 +185,61 @@
 //         // 🔥 store newly created category id
 //         const createdCategoryId = res.data?.data?._id || res.data?._id;
 //         localStorage.setItem("categoryId", createdCategoryId);
+//         setCategoryId(createdCategoryId); // ✅ ADD THIS
 //       }
 
 //       onSuccess();
-//       alert("Category basic info saved!");
+//      showNotification(
+//   isEdit
+//     ? "Category updated successfully"
+//     : "Category created successfully",
+//   "success"
+// );
+
 //     } catch (err) {
-//       alert("Error saving basic info");
+//    showNotification("Failed to save category. Please try again.", "error");
 //       console.error(err);
 //     }
 //   };
 
 //   const handleSaveSEO = async () => {
-//     const categoryId = editData?._id || localStorage.getItem("categoryId");
+//     const id = editData?._id || categoryId;
 
-//     if (!categoryId) {
-//       alert("Please create the category first before saving SEO.");
+//     if (!id) {
+//       alert("Please create category first.");
 //       return;
 //     }
 
 //     try {
-//       await axiosInstance.put(
-//         `/api/admin/categories/${categoryId}/seo`,
-//         form.seo
-//       );
+//       await axiosInstance.put(`/api/admin/categories/${id}/seo`, form.seo);
 
-//       onSuccess();
-//       alert("SEO Metadata saved successfully!");
+//       // ✅ clear after SEO save
+//       localStorage.removeItem("categoryId");
+//       setCategoryId(null);
+
+//      onSuccess();
+//      showNotification(
+//   isEdit
+//     ? "SEO Metadata updated successfully"
+//     : "SEO Metadata created successfully",
+//   "success"
+// );
+
 //     } catch (err) {
 //       console.error(err);
-//       alert("Error saving SEO data");
+//      showNotification("Failed to save SEO data", "error");
+
 //     }
 //   };
 
 //   return (
-//    <Dialog open={open} onClose={handleCloseModal} maxWidth="md" fullWidth scroll="body">
-
+//     <Dialog
+//       open={open}
+//       onClose={handleCloseModal}
+//       maxWidth="md"
+//       fullWidth
+//       scroll="body"
+//     >
 //       <DialogTitle
 //         sx={{
 //           bgcolor: BRAND_NAVY,
@@ -220,7 +253,7 @@
 //         <Typography variant="h6" fontWeight="bold">
 //           {isEdit ? `Update Category: ${form.name}` : "Add New Category"}
 //         </Typography>
-//         <IconButton onClick={onClose} sx={{ color: "white" }}>
+//         <IconButton onClick={handleCloseModal} sx={{ color: "white" }}>
 //           <CloseIcon />
 //         </IconButton>
 //       </DialogTitle>
@@ -255,21 +288,8 @@
 //             mb={3}
 //           >
 //             <Typography variant="h6" color={BRAND_NAVY} fontWeight="bold">
-//               GENERAL INFORMATION
+//               CATEGORY INFORMATION
 //             </Typography>
-//             {/* <Button
-//               variant="contained"
-//               startIcon={<SaveIcon />}
-//               onClick={handleSaveBasicInfo}
-//               sx={{
-//                 bgcolor: BRAND_NAVY,
-//                 px: 1,
-//                 "&:hover": { bgcolor: "#122152" },
-//                 borderRadius: "8px",
-//               }}
-//             >
-//               {isEdit ? "Update Content" : "Create Category"}
-//             </Button> */}
 //           </Box>
 //           <Divider sx={{ mb: 4 }} />
 
@@ -471,7 +491,10 @@
 //             sx={{
 //               bgcolor: BRAND_NAVY,
 //               px: 3,
-//               ml: 80,
+//               ml: { xs: 0, md: 80 }, // ✅ FIX
+//               mt: { xs: 2, md: 0 },
+//               display: "flex",
+//               justifyContent: "center",
 //               "&:hover": { bgcolor: "#122152" },
 //               borderRadius: "8px",
 //             }}
@@ -481,6 +504,12 @@
 //         </Paper>
 
 //         {/* SECTION 2: SEO INFO */}
+//         {!canEditSEO && (
+//           <Typography color="error" mb={2}>
+//             Please create category first to add SEO information.
+//           </Typography>
+//         )}
+
 //         <Paper
 //           elevation={3}
 //           sx={{
@@ -488,6 +517,10 @@
 //             borderRadius: 3,
 //             position: "relative",
 //             overflow: "hidden",
+
+//             // 🔒 STEP-2: disable SEO until category exists
+//             opacity: canEditSEO ? 1 : 0.5,
+//             pointerEvents: canEditSEO ? "auto" : "none",
 //           }}
 //         >
 //           <Box
@@ -508,9 +541,20 @@
 //             mb={3}
 //           >
 //             <Typography variant="h6" color={BRAND_RED} fontWeight="bold">
-//               SEO & METADATA
+//               SEO METADATA
 //             </Typography>
 //           </Box>
+//           <Box
+//             sx={{
+//               position: "absolute",
+//               top: 0,
+//               left: 0,
+//               width: "4px",
+//               height: "100%",
+//               bgcolor: BRAND_RED,
+//             }}
+//           />
+
 //           <Divider sx={{ mb: 4 }} />
 
 //           <Grid>
@@ -563,7 +607,10 @@
 //             sx={{
 //               bgcolor: BRAND_RED,
 //               px: 3,
-//               ml: 80,
+//               ml: { xs: 0, md: 80 }, // ✅ FIX
+//               mt: { xs: 2, md: 0 },
+//               display: "flex",
+//               justifyContent: "center",
 //               "&:hover": { bgcolor: "#ff0000" },
 //               borderRadius: "8px",
 //             }}
@@ -573,14 +620,13 @@
 //         </Paper>
 
 //         <Box mt={4} display="flex" justifyContent="center">
-//          <Button
-//   onClick={handleCloseModal}
-//   variant="outlined"
-//   sx={{ color: "grey.600", borderColor: "grey.400", px: 4 }}
-// >
-//   Close Modal
-// </Button>
-
+//           <Button
+//             onClick={handleCloseModal}
+//             variant="outlined"
+//             sx={{ color: "grey.600", borderColor: "grey.400", px: 4 }}
+//           >
+//             Close Modal
+//           </Button>
 //         </Box>
 //       </DialogContent>
 //     </Dialog>
@@ -612,6 +658,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import axiosInstance from "../../services/axiosInstance";
+import { useNotification } from "../../context/NotificationContext";
 
 const BRAND_NAVY = "#1b2f74";
 const BRAND_RED = "#ff0000";
@@ -675,28 +722,34 @@ const CategoryModal = ({ open, onClose, editData, onSuccess }) => {
   });
   const [imagePreview, setImagePreview] = useState("");
   const [bannerPreview, setBannerPreview] = useState("");
-  const [categoryId, setCategoryId] = useState(null);
+  // const [categoryId, setCategoryId] = useState(null);
   const isEdit = Boolean(editData);
-  const canEditSEO = isEdit || Boolean(categoryId);
+  // const canEditSEO = isEdit || Boolean(categoryId);
+  const { showNotification } = useNotification();
+
+ 
+
+
 
   useEffect(() => {
     if (editData) {
       setForm({
         ...editData,
+          name: editData.name || "",
+      description: editData.description || "", // ✅ keep it
         image: null,
         bannerImage: null,
-        seo: editData.seo || {
-          metaTitle: "",
-          metaKeywords: "",
-          metaDescription: "",
+        seo: {
+          metaTitle: editData.seo?.metaTitle || "",
+          metaDescription: editData.seo?.metaDescription || "",
+          metaKeywords: Array.isArray(editData.seo?.metaKeywords)
+            ? editData.seo.metaKeywords.join(",")
+            : "",
         },
       });
 
       setImagePreview(editData.image || "");
       setBannerPreview(editData.bannerImage || "");
-
-      // ✅ EDIT MODE → allow SEO
-      setCategoryId(editData._id);
     } else {
       setForm({
         name: "",
@@ -704,15 +757,15 @@ const CategoryModal = ({ open, onClose, editData, onSuccess }) => {
         image: null,
         bannerImage: null,
         status: true,
-        seo: { metaTitle: "", metaKeywords: "", metaDescription: "" },
+        seo: {
+          metaTitle: "",
+          metaKeywords: "",
+          metaDescription: "",
+        },
       });
 
       setImagePreview("");
       setBannerPreview("");
-
-      // ✅ ADD MODE → block SEO
-      setCategoryId(null);
-      localStorage.removeItem("categoryId");
     }
   }, [editData, open]);
 
@@ -750,61 +803,43 @@ const CategoryModal = ({ open, onClose, editData, onSuccess }) => {
   const handleSaveBasicInfo = async () => {
     try {
       const formData = new FormData();
+
+      // CATEGORY FIELDS
       formData.append("name", form.name);
-      formData.append("description", form.description);
+      formData.append("description", form.description || "");
+
+      formData.append("status", form.status);
+
       if (form.image) formData.append("image", form.image);
       if (form.bannerImage) formData.append("bannerImage", form.bannerImage);
 
-      let res;
+      // ✅ SEO AS JSON STRING (IMPORTANT)
+      formData.append("metaTitle", form.seo.metaTitle);
+      formData.append("metaKeywords", form.seo.metaKeywords);
+      formData.append("metaDescription", form.seo.metaDescription);
 
       if (isEdit) {
-        res = await axiosInstance.put(
+        await axiosInstance.put(
           `/api/admin/categories/${editData._id}`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
-
-        // keep existing id
-        localStorage.setItem("categoryId", editData._id);
       } else {
-        res = await axiosInstance.post("/api/admin/categories", formData, {
+        await axiosInstance.post("/api/admin/categories", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-
-        // 🔥 store newly created category id
-        const createdCategoryId = res.data?.data?._id || res.data?._id;
-        localStorage.setItem("categoryId", createdCategoryId);
-        setCategoryId(createdCategoryId); // ✅ ADD THIS
       }
 
       onSuccess();
-      alert("Category basic info saved!");
-    } catch (err) {
-      alert("Error saving basic info");
-      console.error(err);
-    }
-  };
-
-  const handleSaveSEO = async () => {
-    const id = editData?._id || categoryId;
-
-    if (!id) {
-      alert("Please create category first.");
-      return;
-    }
-
-    try {
-      await axiosInstance.put(`/api/admin/categories/${id}/seo`, form.seo);
-
-      // ✅ clear after SEO save
-      localStorage.removeItem("categoryId");
-      setCategoryId(null);
-
-      onSuccess();
-      alert("SEO Metadata saved successfully!");
+      showNotification(
+        isEdit
+          ? "Category & SEO updated successfully"
+          : "Category & SEO created successfully",
+        "success"
+      );
     } catch (err) {
       console.error(err);
-      alert("Error saving SEO data");
+      showNotification("Failed to save category data", "error");
     }
   };
 
@@ -846,7 +881,6 @@ const CategoryModal = ({ open, onClose, editData, onSuccess }) => {
             overflow: "hidden",
           }}
         >
-
           <Box
             sx={{
               position: "absolute",
@@ -867,19 +901,6 @@ const CategoryModal = ({ open, onClose, editData, onSuccess }) => {
             <Typography variant="h6" color={BRAND_NAVY} fontWeight="bold">
               CATEGORY INFORMATION
             </Typography>
-            {/* <Button
-              variant="contained"
-              startIcon={<SaveIcon />}
-              onClick={handleSaveBasicInfo}
-              sx={{
-                bgcolor: BRAND_NAVY,
-                px: 1,
-                "&:hover": { bgcolor: "#122152" },
-                borderRadius: "8px",
-              }}
-            >
-              {isEdit ? "Update Content" : "Create Category"}
-            </Button> */}
           </Box>
           <Divider sx={{ mb: 4 }} />
 
@@ -1074,28 +1095,31 @@ const CategoryModal = ({ open, onClose, editData, onSuccess }) => {
               </Grid>
             </Grid>
           </Grid>
-          <Button
+          {/* <Button
             variant="contained"
             startIcon={<SaveIcon />}
             onClick={handleSaveBasicInfo}
             sx={{
               bgcolor: BRAND_NAVY,
               px: 3,
-              ml: 80,
+              ml: { xs: 0, md: 80 }, // ✅ FIX
+              mt: { xs: 2, md: 0 },
+              display: "flex",
+              justifyContent: "center",
               "&:hover": { bgcolor: "#122152" },
               borderRadius: "8px",
             }}
           >
             {isEdit ? "Update" : "Create"}
-          </Button>
+          </Button> */}
         </Paper>
 
         {/* SECTION 2: SEO INFO */}
-        {!canEditSEO && (
+        {/* {!canEditSEO && (
           <Typography color="error" mb={2}>
             Please create category first to add SEO information.
           </Typography>
-        )}
+        )} */}
 
         <Paper
           elevation={3}
@@ -1106,31 +1130,31 @@ const CategoryModal = ({ open, onClose, editData, onSuccess }) => {
             overflow: "hidden",
 
             // 🔒 STEP-2: disable SEO until category exists
-            opacity: canEditSEO ? 1 : 0.5,
-            pointerEvents: canEditSEO ? "auto" : "none",
+            // opacity: canEditSEO ? 1 : 0.5,
+            // pointerEvents: canEditSEO ? "auto" : "none",
           }}
         >
-           <Box
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "4px",
-                        height: "100%",
-                        bgcolor: BRAND_RED,
-                      }}
-                    />
-          
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      mb={3}
-                    >
-                      <Typography variant="h6" color={BRAND_RED} fontWeight="bold">
-                        SEO  METADATA
-                      </Typography>
-                    </Box>
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "4px",
+              height: "100%",
+              bgcolor: BRAND_RED,
+            }}
+          />
+
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={3}
+          >
+            <Typography variant="h6" color={BRAND_RED} fontWeight="bold">
+              SEO METADATA
+            </Typography>
+          </Box>
           <Box
             sx={{
               position: "absolute",
@@ -1190,16 +1214,19 @@ const CategoryModal = ({ open, onClose, editData, onSuccess }) => {
           <Button
             variant="contained"
             startIcon={<SaveIcon />}
-            onClick={handleSaveSEO}
+            onClick={handleSaveBasicInfo}
             sx={{
-              bgcolor: BRAND_RED,
+              bgcolor: BRAND_NAVY,
               px: 3,
-              ml: 80,
-              "&:hover": { bgcolor: "#ff0000" },
+              ml: { xs: 0, md: 80 }, // ✅ FIX
+              mt: { xs: 2, md: 0 },
+              display: "flex",
+              justifyContent: "center",
+              "&:hover": { bgcolor: "#122152" },
               borderRadius: "8px",
             }}
           >
-            {isEdit ? "Update " : "Create "}
+            {isEdit ? "Update" : "Create"}
           </Button>
         </Paper>
 

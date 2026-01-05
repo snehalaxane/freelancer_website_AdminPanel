@@ -8,6 +8,7 @@ import {
   Breadcrumbs,
   Link,
 } from "@mui/material";
+import CommonPagination from "../../components/common/Pagination/CommonPagination";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useNavigate } from "react-router-dom";
 import StatusChip from "../../components/common/StatusChip";
@@ -27,6 +28,15 @@ const Freelancers = () => {
   const [loading, setLoading] = useState(true);
   const [selectedFreelancer, setSelectedFreelancer] = useState(null);
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+const rowsPerPage = 20;
+
+
+const paginatedCategories = freelancers.slice(
+  (page - 1) * rowsPerPage,
+  page * rowsPerPage
+);
+
 
   useEffect(() => {
     const fetchFreelancers = async () => {
@@ -60,7 +70,6 @@ const Freelancers = () => {
   if (!freelancers)
     return <Typography sx={{ p: 4 }}>Freelancer not found.</Typography>;
 
-  
   return (
     <Box p={1}>
       {/* Header with Breadcrumbs and Gradient Title */}
@@ -70,7 +79,7 @@ const Freelancers = () => {
             Dashboard
           </Link>
           <Typography color="text.primary" sx={{ fontSize: "0.9rem" }}>
-            User Requests
+            Users Request
           </Typography>
         </Breadcrumbs>
 
@@ -86,7 +95,7 @@ const Freelancers = () => {
             mb: 1,
           }}
         >
-          Freelancer Requests
+          Freelancers Request
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Review and manage freelancer profiles and system access.
@@ -95,82 +104,90 @@ const Freelancers = () => {
 
       {/* Table Container */}
       <Paper elevation={0}>
-  <Box
-    sx={{
-      width: "100%",
-      overflowX: "auto",
-      WebkitOverflowScrolling: "touch",
-    }}
-  >
-    {/* Force table width so scroll appears on mobile */}
-    <Box sx={{ minWidth: 1000 }}>
-      <TableWrapper>
-        <CommonTable
-          columns={columns}
-          rows={freelancers}
-          renderRow={(f, index) => (
-            <StyledTableRow key={f._id || index}>
-              <BodyCell sx={{ fontWeight: 700, color: PRIMARY_BLUE }}>
-                {String(index + 1).padStart(2)}
-              </BodyCell>
+        <Box
+          sx={{
+            width: "100%",
+            overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          {/* Force table width so scroll appears on mobile */}
+          <Box sx={{ minWidth: 1000 }}>
+            <TableWrapper>
+              <CommonTable
+                columns={columns}
+                rows={paginatedCategories}
 
-              <BodyCell sx={{ fontWeight: 500, color: "#1e293b" }}>
-                {f.firstName} {f.lastName}
-              </BodyCell>
+                renderRow={(f, index) => (
+                  <StyledTableRow key={f._id || index}>
+                    <BodyCell sx={{ fontWeight: 700, color: PRIMARY_BLUE }}>
+                       {(page - 1) * rowsPerPage + index + 1}
+                    </BodyCell>
 
-              <BodyCell>{f.email}</BodyCell>
+                    <BodyCell sx={{ fontWeight: 500, color: "#1e293b" }}>
+                      {f.firstName} {f.lastName}
+                    </BodyCell>
 
-              <BodyCell>{f.phoneNumber || "N/A"}</BodyCell>
+                    <BodyCell>{f.email}</BodyCell>
 
-              <BodyCell>
-                <Box
-                  component="span"
-                  sx={{
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: "6px",
-                    backgroundColor: "#f1f5f9",
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  {new Date(f.createdAt).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </Box>
-              </BodyCell>
+                    <BodyCell>{f.phoneNumber || "N/A"}</BodyCell>
 
-              <BodyCell>
-                <StatusChip status={f.status} />
-              </BodyCell>
+                    <BodyCell>
+                      <Box
+                        component="span"
+                        sx={{
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: "6px",
+                          backgroundColor: "#f1f5f9",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {new Date(f.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </Box>
+                    </BodyCell>
 
-              <BodyCell>
-                <IconButton
-                  size="small"
-                  sx={{
-                    color: PRIMARY_BLUE,
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 0, 0, 0.08)",
-                      color: ACCENT_RED,
-                    },
-                  }}
-                  onClick={() =>
-                    navigate(`/requests/freelancers/${f._id}`)
-                  }
-                >
-                  <VisibilityIcon fontSize="small" />
-                </IconButton>
-              </BodyCell>
-            </StyledTableRow>
-          )}
-        />
-      </TableWrapper>
-    </Box>
-  </Box>
-</Paper>
+                    <BodyCell>
+                      <StatusChip status={f.status} />
+                    </BodyCell>
+
+                    <BodyCell>
+                      <IconButton
+                        size="small"
+                        sx={{
+                          color: PRIMARY_BLUE,
+                          transition: "all 0.2s",
+                          "&:hover": {
+                            backgroundColor: "rgba(255, 0, 0, 0.08)",
+                            color: ACCENT_RED,
+                          },
+                        }}
+                        onClick={() =>
+                          navigate(`/requests/freelancers/${f._id}`)
+                        }
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                    </BodyCell>
+                  </StyledTableRow>
+                )}
+              />
+            </TableWrapper>
+          </Box>
+        </Box>
+      </Paper>
+
+      <CommonPagination
+  totalItems={freelancers.length}
+  page={page}
+  rowsPerPage={rowsPerPage}
+  onPageChange={setPage}
+/>
 
 
       {/* DETAILS MODAL */}

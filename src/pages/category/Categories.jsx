@@ -8,13 +8,18 @@ import {
   Link,
   Typography,
   Breadcrumbs,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useNavigate } from "react-router-dom";
-
+import { useNotification } from "../../context/NotificationContext";
+import CommonPagination from "../../components/common/Pagination/CommonPagination";
 import CommonTable from "../../components/common/Table/CommonTable";
 import StatusChip from "../../components/common/StatusChip";
 import {
@@ -32,6 +37,29 @@ const Categories = () => {
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [editData, setEditData] = useState(null);
+  const { showNotification } = useNotification();
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 20;
+
+  const paginatedCategories = categories.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
+
+  const [confirmDelete, setConfirmDelete] = useState({
+    open: false,
+    id: null,
+    name: "",
+  });
+  const onConfirmDelete = () => {
+    handleDelete(confirmDelete.id, confirmDelete.name);
+
+    setConfirmDelete({
+      open: false,
+      id: null,
+      name: "",
+    });
+  };
 
   // ---------------- FETCH CATEGORIES ----------------
   const fetchCategories = async () => {
@@ -70,16 +98,25 @@ const Categories = () => {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    if (page > Math.ceil(categories.length / rowsPerPage)) {
+      setPage(1);
+    }
+  }, [categories]);
+
   // ---------------- DELETE CATEGORY ----------------
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this category?"))
-      return;
+  const handleDelete = async (id, name) => {
+    // if (!window.confirm("Are you sure you want to delete this category?"))
+    //   return;
 
     try {
       await axiosInstance.delete(`/api/admin/categories/${id}`);
+
+      showNotification(`"${name}" category deleted successfully`, "success");
+
       fetchCategories();
     } catch (error) {
-      console.error("Delete failed:", error);
+      showNotification(`Failed to delete "${name}" category`, "error");
     }
   };
 
@@ -96,7 +133,7 @@ const Categories = () => {
   // ---------------- ROW RENDER ----------------
   const renderRow = (row, index) => (
     <StyledTableRow key={row._id}>
-      <BodyCell>{index + 1}</BodyCell>
+      <BodyCell>{(page - 1) * rowsPerPage + index + 1}</BodyCell>
 
       <BodyCell sx={{ textAlign: "center" }}>
         <Avatar
@@ -153,7 +190,16 @@ const Categories = () => {
             <EditIcon />
           </IconButton>
 
-          <IconButton color="error" onClick={() => handleDelete(row._id)}>
+          <IconButton
+            color="error"
+            onClick={() =>
+              setConfirmDelete({
+                open: true,
+                id: row._id,
+                name: row.name,
+              })
+            }
+          >
             <DeleteIcon />
           </IconButton>
         </Box>
@@ -226,9 +272,16 @@ const Categories = () => {
       {/* Table */}
       <CommonTable
         columns={columns}
-        rows={categories}
+        rows={paginatedCategories}
         renderRow={renderRow}
         loading={loading}
+      />
+
+      <CommonPagination
+        totalItems={categories.length}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={setPage}
       />
 
       {/* Modal */}
@@ -241,6 +294,34 @@ const Categories = () => {
         editData={editData}
         onSuccess={fetchCategories}
       />
+
+      <Dialog
+        open={confirmDelete.open}
+        onClose={() => setConfirmDelete({ open: false, id: null, name: "" })}
+      >
+        <DialogTitle>Delete Category</DialogTitle>
+
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete{" "}
+            <strong>{confirmDelete.name}</strong>?
+          </Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button
+            onClick={() =>
+              setConfirmDelete({ open: false, id: null, name: "" })
+            }
+          >
+            Cancel
+          </Button>
+
+          <Button color="error" variant="contained" onClick={onConfirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

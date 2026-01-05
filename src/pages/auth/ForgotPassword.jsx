@@ -118,25 +118,26 @@ const ForgotPassword = () => {
         width: "100vw", // Ensures full width
         p: { xs: 2, md: 0 }, // Small padding on mobile only
         position: "relative",
-        overflow: "hidden",
+        overflowX: "hidden", // ✅ HERE (not inside)
       }}
     >
       <Box
         sx={{
           width: "100%",
-          maxWidth: "1050px",
+          maxWidth: { xs: "100%", md: "1050px" },
           minHeight: "670px",
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           alignItems: "stretch",
           gap: { xs: 4, md: 0 },
+          // overflowX: "hidden",   // ✅ ADD THIS
         }}
       >
         {/* ================= IMAGE (NO PAPER, NO BG) ================= */}
         <Box
           sx={{
             flex: 1.2,
-            pl: 10,
+            pl: { xs: 0, md: 10 },
             display: { xs: "none", md: "flex" }, // hide on mobile
             alignItems: "center",
             justifyContent: "center",
@@ -148,11 +149,10 @@ const ForgotPassword = () => {
             src="/Questions-bro.svg"
             alt="Forgot Password"
             sx={{
-              width: "250%",
+              width: { xs: "100%", md: "250%" },
               maxWidth: "600px",
               height: "80%",
-              mr: "70%",
-              filter: "drop-shadow(0px 20px 30px rgba(0,0,0,0.1))",
+              mr: { xs: 0, md: "70%" },
             }}
           />
         </Box>
@@ -163,7 +163,7 @@ const ForgotPassword = () => {
           sx={{
             flex: 1,
             p: { xs: 4, md: 6 },
-            mr: "-20%",
+            mr: { xs: 0, md: "-20%" },
             borderRadius: "32px",
             background: "rgba(255, 255, 255, 0.95)",
             backdropFilter: "blur(10px)",
@@ -287,7 +287,8 @@ const ForgotPassword = () => {
               textAlign: "center",
               fontWeight: 800,
               color: "#1b2f74",
-              ml: "39%",
+              ml: 0,
+              display: "block",
             }}
           >
             Back to Login
